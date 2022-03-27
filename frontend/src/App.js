@@ -35,6 +35,12 @@ class App extends Component {
     axios
         .get("/api/packages/")
         .then((res) => this.setState({ packageList: res.data }))
+        .then(() => {
+          let getActivePackage = this.state.packageList.filter((p) => !!this.state.activePackage.id && p.id === this.state.activePackage.id);
+          if (getActivePackage.length > 0) {
+            this.setState({ activePackage: getActivePackage[0] });
+          }
+        })
         .then(() => console.log(this.state.packageList))
         .catch((err) => console.log(err));
   };
@@ -167,8 +173,6 @@ class App extends Component {
 
   renderDocuments = () => {
     const newItems = this.state.activePackage.all_documents
-
-    console.log(this.state.activePackage);
 
     return newItems.map((item) => (
         <li

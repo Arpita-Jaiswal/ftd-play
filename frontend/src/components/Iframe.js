@@ -11,7 +11,7 @@ const Iframe = (props) => {
         doc.write(props.content);
         doc.close();
         frame.style.width = '100%';
-        frame.style.height =     `${frame.contentWindow.document.body.scrollHeight}px`;
+        frame.style.height = `500px`;
     };
     return (
         <iframe src="about:blank" frameBorder="0" ref={writeHTML}
