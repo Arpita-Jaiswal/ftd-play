@@ -57,6 +57,8 @@ def detail_view(_request, package_id, document_id):
     doc_id = path + "/.build/"
     if document_id == "index.ftd":
         doc_id += "index.html"
+    elif document_id == "FPM.ftd":
+        doc_id += "-/index.html"
     else:
         doc_id += document_id.replace(".ftd", "/index.html")
 
