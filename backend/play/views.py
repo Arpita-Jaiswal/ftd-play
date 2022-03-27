@@ -1,6 +1,6 @@
 from django.shortcuts import render
-from rest_framework import viewsets
-from .serializers import DocumentSerializer, PackageSerializer
+from rest_framework import viewsets, status
+from .serializers import DocumentSerializer, PackageSerializer, PackagePutSerializer
 from .models import Document, Package
 
 
@@ -14,6 +14,27 @@ class DocumentView(viewsets.ModelViewSet):
 class PackageView(viewsets.ModelViewSet):
     serializer_class = PackageSerializer
     queryset = Package.objects.all()
+
+    def create(self, request):
+        from rest_framework.response import Response
+        serializer = PackagePutSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response({'status': 'package set', 'data': request.data})
+        else:
+            return Response(serializer.errors,
+                            status=status.HTTP_400_BAD_REQUEST)
+
+    def update(self, request, pk=None):
+        from rest_framework.response import Response
+        package = self.get_object()
+        serializer = PackagePutSerializer(package, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response({'status': 'package set', 'data': request.data})
+        else:
+            return Response(serializer.errors,
+                            status=status.HTTP_400_BAD_REQUEST)
 
 
 def detail_view(_request, package_id, document_id):

@@ -14,3 +14,9 @@ class PackageSerializer(serializers.ModelSerializer):
     class Meta:
         model = Package
         fields = ('id', 'path', 'description', 'created_on', 'updated_on', 'all_documents')
+
+
+class PackagePutSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Package
+        fields = ('id', 'path', 'description', 'created_on', 'updated_on')

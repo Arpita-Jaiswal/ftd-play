@@ -15,20 +15,16 @@ export default class CustomModal extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            activeItem: this.props.activeItem,
+            activePackage: this.props.activePackage,
         };
     }
 
     handleChange = (e) => {
         let { name, value } = e.target;
 
-        if (e.target.type === "checkbox") {
-            value = e.target.checked;
-        }
+        const activePackage = { ...this.state.activePackage, [name]: value };
 
-        const activeItem = { ...this.state.activeItem, [name]: value };
-
-        this.setState({ activeItem });
+        this.setState({ activePackage });
     };
 
     render() {
@@ -44,10 +40,10 @@ export default class CustomModal extends Component {
                             <Input
                                 type="text"
                                 id="todo-title"
-                                name="title"
-                                value={this.state.activeItem.title}
+                                name="path"
+                                value={this.state.activePackage.path}
                                 onChange={this.handleChange}
-                                placeholder="Enter Todo Title"
+                                placeholder="Enter Package name"
                             />
                         </FormGroup>
                         <FormGroup>
@@ -56,28 +52,17 @@ export default class CustomModal extends Component {
                                 type="text"
                                 id="todo-description"
                                 name="description"
-                                value={this.state.activeItem.description}
+                                value={this.state.activePackage.description}
                                 onChange={this.handleChange}
-                                placeholder="Enter Todo description"
+                                placeholder="Enter Package description"
                             />
-                        </FormGroup>
-                        <FormGroup check>
-                            <Label check>
-                                <Input
-                                    type="checkbox"
-                                    name="completed"
-                                    checked={this.state.activeItem.completed}
-                                    onChange={this.handleChange}
-                                />
-                                Completed
-                            </Label>
                         </FormGroup>
                     </Form>
                 </ModalBody>
                 <ModalFooter>
                     <Button
                         color="success"
-                        onClick={() => onSave(this.state.activeItem)}
+                        onClick={() => onSave(this.state.activePackage)}
                     >
                         Save
                     </Button>

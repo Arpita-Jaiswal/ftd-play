@@ -1,105 +1,69 @@
 import React, { Component } from "react";
-import Modal from "./components/Modal";
+import PackageModal from "./components/PackageModal";
 import axios from "axios";
-
-const todoItems = [
-  {
-    id: 1,
-    title: "Go to Market",
-    description: "Buy ingredients to prepare dinner",
-    completed: true,
-  },
-  {
-    id: 2,
-    title: "Study",
-    description: "Read Algebra and History textbook for the upcoming test",
-    completed: false,
-  },
-  {
-    id: 3,
-    title: "Sammy's books",
-    description: "Go to library to return Sammy's books",
-    completed: true,
-  },
-  {
-    id: 4,
-    title: "Article",
-    description: "Write article on how to use Django with React",
-    completed: false,
-  },
-];
 
 class App extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      viewCompleted: false,
-      todoList: todoItems,
-      modal: false,
-      activeItem: {
-        title: "",
+      packageModal: false,
+      activePackage: {
+        path: "",
         description: "",
-        completed: false,
       },
+      packageList: []
     };
   }
 
-  toggle = () => {
-    this.setState({ modal: !this.state.modal });
+  componentDidMount() {
+    this.refreshList();
+  }
+
+  refreshList = () => {
+    axios
+        .get("/api/packages/")
+        .then((res) => this.setState({ packageList: res.data }))
+        .then(() => console.log(this.state.packageList))
+        .catch((err) => console.log(err));
   };
 
-  handleSubmit = (item) => {
+  toggle = () => {
+    this.setState({ packageModal: !this.state.packageModal });
+  };
+
+  handlePackageSubmit = (item) => {
     this.toggle();
 
-    alert("save" + JSON.stringify(item));
+    console.log("handlePackageSubmit", item);
+    if (item.id) {
+      axios
+          .put(`/api/packages/${item.id}/`, item)
+          .then((res) => this.refreshList());
+      return;
+    }
+    axios
+        .post("/api/packages/", item)
+        .then((res) => this.refreshList());
+
   };
 
   handleDelete = (item) => {
     alert("delete" + JSON.stringify(item));
   };
 
-  createItem = () => {
-    const item = { title: "", description: "", completed: false };
+  createPackage = () => {
+    const item = { path: "", description: "" };
 
-    this.setState({ activeItem: item, modal: !this.state.modal });
+    this.setState({ activePackage: item, packageModal: !this.state.packageModal });
   };
 
-  editItem = (item) => {
-    this.setState({ activeItem: item, modal: !this.state.modal });
+
+  editPackage = (item) => {
+    this.setState({ activePackage: item, packageModal: !this.state.packageModal });
   };
 
-  displayCompleted = (status) => {
-    if (status) {
-      return this.setState({ viewCompleted: true });
-    }
-
-    return this.setState({ viewCompleted: false });
-  };
-
-  renderTabList = () => {
-    return (
-        <div className="nav nav-tabs">
-        <span
-            className={this.state.viewCompleted ? "nav-link active" : "nav-link"}
-            onClick={() => this.displayCompleted(true)}
-        >
-          Complete
-        </span>
-          <span
-              className={this.state.viewCompleted ? "nav-link" : "nav-link active"}
-              onClick={() => this.displayCompleted(false)}
-          >
-          Incomplete
-        </span>
-        </div>
-    );
-  };
-
-  renderItems = () => {
-    const { viewCompleted } = this.state;
-    const newItems = this.state.todoList.filter(
-        (item) => item.completed == viewCompleted
-    );
+  renderPackages = () => {
+    const newItems = this.state.packageList
 
     return newItems.map((item) => (
         <li
@@ -112,12 +76,12 @@ class App extends Component {
             }`}
             title={item.description}
         >
-          {item.title}
+          {item.path}
         </span>
           <span>
           <button
               className="btn btn-secondary mr-2"
-              onClick={() => this.editItem(item)}
+              onClick={() => this.editPackage(item)}
           >
             Edit
           </button>
@@ -137,28 +101,27 @@ class App extends Component {
         <main className="container">
           <h1 className="text-white text-uppercase text-center my-4">Todo app</h1>
           <div className="row">
-            <div className="col-md-6 col-sm-10 mx-auto p-0">
+            <div className="col-sm-4">
               <div className="card p-3">
                 <div className="mb-4">
                   <button
                       className="btn btn-primary"
-                      onClick={this.createItem}
+                      onClick={this.createPackage}
                   >
-                    Add task
+                    Add Document
                   </button>
+                  <ul className="list-group list-group-flush border-top-0">
+                    {this.renderPackages()}
+                  </ul>
                 </div>
-                {this.renderTabList()}
-                <ul className="list-group list-group-flush border-top-0">
-                  {this.renderItems()}
-                </ul>
               </div>
             </div>
           </div>
-          {this.state.modal ? (
-              <Modal
-                  activeItem={this.state.activeItem}
+          {this.state.packageModal ? (
+              <PackageModal
+                  activePackage={this.state.activePackage}
                   toggle={this.toggle}
-                  onSave={this.handleSubmit}
+                  onSave={this.handlePackageSubmit}
               />
           ) : null}
         </main>
