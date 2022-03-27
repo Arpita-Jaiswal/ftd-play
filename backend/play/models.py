@@ -15,7 +15,7 @@ class Package(models.Model):
 
 
 class Document(models.Model):
-    path = pg.CITextField(db_index=True, unique=True)
+    path = pg.CITextField(db_index=True)
     content = models.TextField()
     package = models.ForeignKey(Package, on_delete=models.CASCADE, related_name='documents')
     created_on = models.DateTimeField(auto_now_add=True)
@@ -25,7 +25,7 @@ class Document(models.Model):
     class Meta:
         constraints = [
             models.UniqueConstraint(
-                fields=("base_path", "path"),
+                fields=("base_path", "path", "package"),
                 name="content_path_base_path_unique",
             ),
         ]
