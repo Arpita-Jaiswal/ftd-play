@@ -57,4 +57,18 @@ pip3 install -r requirements.txt
 python manage.py runserver
 ```
 
+# How to run frontend (react)
+
+1. Install npm
+
+```shell
+npm install
+```
+
+2. Run npm
+
+```shell
+npm start
+```
+
 
