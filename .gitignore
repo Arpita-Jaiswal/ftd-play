@@ -5,15 +5,19 @@ play-venv
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
 # dependencies
+frontend/node_modules
+frontend/.pnp
 frontend-react/node_modules
 frontend-react/.pnp
 .pnp.js
 
 # testing
 frontend-react/coverage
+frontend/coverage
 
 # production
 frontend-react/build
+frontend/build
 
 # misc
 .DS_Store
