@@ -1,6 +1,8 @@
 import React, { Component } from "react";
 import PackageModal from "./components/PackageModal";
+import DocumentModal from "./components/DocumentModal";
 import axios from "axios";
+import ReactDOM from "react-dom";
 
 class App extends Component {
   constructor(props) {
@@ -11,15 +13,24 @@ class App extends Component {
         path: "",
         description: "",
       },
-      packageList: []
+      packageList: [],
+      showDocumentList: false,
+      documentModal: false,
+      activeDocument: {
+        path: "",
+        content: "",
+        base_path: ".",
+        package: 0,
+      },
+      renderHTML: "",
     };
   }
 
   componentDidMount() {
-    this.refreshList();
+    this.refreshPackageList();
   }
 
-  refreshList = () => {
+  refreshPackageList = () => {
     axios
         .get("/api/packages/")
         .then((res) => this.setState({ packageList: res.data }))
@@ -31,6 +42,10 @@ class App extends Component {
     this.setState({ packageModal: !this.state.packageModal });
   };
 
+  toggleDocument = () => {
+    this.setState({ documentModal: !this.state.documentModal });
+  };
+
   handlePackageSubmit = (item) => {
     this.toggle();
 
@@ -38,12 +53,27 @@ class App extends Component {
     if (item.id) {
       axios
           .put(`/api/packages/${item.id}/`, item)
-          .then((res) => this.refreshList());
+          .then((res) => this.refreshPackageList());
       return;
     }
     axios
         .post("/api/packages/", item)
-        .then((res) => this.refreshList());
+        .then((res) => this.refreshPackageList());
+
+  };
+
+  handleDocumentSubmit = (item) => {
+    this.toggleDocument();
+
+    if (item.id) {
+      axios
+          .put(`/api/documents/${item.id}/`, item)
+          .then((res) => this.refreshPackageList());
+      return;
+    }
+    axios
+        .post("/api/documents/", item)
+        .then((res) => this.refreshPackageList());
 
   };
 
@@ -57,9 +87,37 @@ class App extends Component {
     this.setState({ activePackage: item, packageModal: !this.state.packageModal });
   };
 
+  createDocument = () => {
+    const item = { path: "", content: "", base_path: "", package: this.state.activePackage.id };
+
+    this.setState({ activeDocument: item, documentModal: !this.state.documentModal });
+  };
+
 
   editPackage = (item) => {
     this.setState({ activePackage: item, packageModal: !this.state.packageModal });
+  };
+
+  renderHTML = (item) => {
+    this.setState({ activeDocument: item });
+
+    axios
+        .get(`/ftd-build/${this.state.activePackage.path}/${item.path}/`)
+        .then((res) => {
+          console.log("renderHTML", res);
+          ReactDOM.render(
+              <div dangerouslySetInnerHTML={{ __html: res.data}} />,
+              document.getElementById('container')
+          );
+        });
+  }
+
+  editDocument = (item) => {
+    this.setState({ activeDocument: item, documentModal: !this.state.documentModal });
+  };
+
+  showDocuments = (item) => {
+    this.setState({ activePackage: item, showDocumentList: !this.state.showDocumentList });
   };
 
   renderPackages = () => {
@@ -75,6 +133,7 @@ class App extends Component {
                 this.state.viewCompleted ? "completed-todo" : ""
             }`}
             title={item.description}
+            onClick={() => this.showDocuments(item)}
         >
           {item.path}
         </span>
@@ -82,6 +141,49 @@ class App extends Component {
           <button
               className="btn btn-secondary mr-2"
               onClick={() => this.editPackage(item)}
+          >
+            Edit
+          </button>
+          <button
+              className="btn btn-danger"
+              onClick={() => this.handleDelete(item)}
+          >
+            Delete
+          </button>
+        </span>
+        </li>
+    ));
+  };
+
+  renderDocuments = () => {
+    const newItems = this.state.activePackage.all_documents
+
+    console.log(this.state.activePackage);
+
+    return newItems.map((item) => (
+        <li
+            key={item.id}
+            className="list-group-item d-flex justify-content-between align-items-center"
+        >
+        <span
+            className={`todo-title mr-2 ${
+                this.state.viewCompleted ? "completed-todo" : ""
+            }`}
+            title={item.description}
+            onClick={() => this.showDocuments(item)}
+        >
+          {item.path}
+        </span>
+          <span>
+          <button
+              className="btn btn-success mr-2"
+              onClick={() => this.renderHTML(item)}
+          >
+            Show
+          </button>
+          <button
+              className="btn btn-secondary mr-2"
+              onClick={() => this.editDocument(item)}
           >
             Edit
           </button>
@@ -124,6 +226,33 @@ class App extends Component {
                   onSave={this.handlePackageSubmit}
               />
           ) : null}
+          {this.state.showDocumentList ? (
+                  <div className="row">
+                    <div className="col-sm-10">
+                      <div className="card p-3">
+                        <div className="mb-4">
+                          <button
+                              className="btn btn-primary"
+                              onClick={this.createDocument}
+                          >
+                            Add Document
+                          </button>
+                          <ul className="list-group list-group-flush border-top-0">
+                            {this.renderDocuments()}
+                          </ul>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+          ) : null}
+          {this.state.documentModal ? (
+              <DocumentModal
+                  activeDocument={this.state.activeDocument}
+                  toggle={this.toggleDocument}
+                  onSave={this.handleDocumentSubmit}
+              />
+          ) : null}
+          <div id="container"></div>
         </main>
     );
   }
