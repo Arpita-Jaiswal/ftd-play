@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import PackageModal from "./components/PackageModal";
 import DocumentModal from "./components/DocumentModal";
+import Iframe from "./components/Iframe";
 import axios from "axios";
 import ReactDOM from "react-dom";
 
@@ -100,13 +101,22 @@ class App extends Component {
 
   renderHTML = (item) => {
     this.setState({ activeDocument: item });
+    // window.open(`http://127.0.0.1:8000/ftd-build/${this.state.activePackage.path}/${item.path}/`, "_blank");
+    // ReactDOM.render(
+    //     <iframe src={`http://127.0.0.1:8000/ftd-build/${this.state.activePackage.path}/${item.path}/`} sandbox='allow-scripts allow-modal'/>,
+    //     document.getElementById('container')
+    // );
+
 
     axios
         .get(`/ftd-build/${this.state.activePackage.path}/${item.path}/`)
         .then((res) => {
           console.log("renderHTML", res);
+          ReactDOM.unmountComponentAtNode(document.getElementById('container'));
           ReactDOM.render(
-              <div dangerouslySetInnerHTML={{ __html: res.data}} />,
+              <Iframe
+                  content={res.data}
+              />,
               document.getElementById('container')
           );
         });
