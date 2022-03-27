@@ -7,16 +7,12 @@ play-venv
 # dependencies
 frontend/node_modules
 frontend/.pnp
-frontend-react/node_modules
-frontend-react/.pnp
 .pnp.js
 
 # testing
-frontend-react/coverage
 frontend/coverage
 
 # production
-frontend-react/build
 frontend/build
 
 # misc
